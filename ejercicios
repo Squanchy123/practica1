@@ -1,0 +1,568 @@
+1.-
+#include <iostream>
+#include <algorithm>
+
+const int NUM_ESTUDIANTES = 3;
+const int NUM_ASIGNATURAS = 4;
+
+// Función para calcular el promedio de calificaciones de cada estudiante
+void calcularPromedio(float calificaciones[][NUM_ASIGNATURAS]) {
+    for (int i = 0; i < NUM_ESTUDIANTES; ++i) {
+        float sum = 0;
+        for (int j = 0; j < NUM_ASIGNATURAS; ++j) {
+            sum += calificaciones[i][j];
+        }
+        float promedio = sum / NUM_ASIGNATURAS;
+        std::cout << "El promedio de calificaciones del estudiante " << i+1 << " es: " << promedio << std::endl;
+    }
+}
+
+// Función para ordenar las calificaciones de cada estudiante de mayor a menor
+void ordenarCalificaciones(float calificaciones[][NUM_ASIGNATURAS]) {
+    for (int i = 0; i < NUM_ESTUDIANTES; ++i) {
+        std::sort(calificaciones[i], calificaciones[i] + NUM_ASIGNATURAS, std::greater<float>());
+    }
+}
+
+// Método de búsqueda para encontrar la calificación más alta en una asignatura específica
+float buscarCalificacionMasAlta(float calificaciones[][NUM_ASIGNATURAS], int asignatura) {
+    float maxCalificacion = calificaciones[0][asignatura];
+    for (int i = 1; i < NUM_ESTUDIANTES; ++i) {
+        if (calificaciones[i][asignatura] > maxCalificacion) {
+            maxCalificacion = calificaciones[i][asignatura];
+        }
+    }
+    return maxCalificacion;
+}
+
+int main() {
+    float calificaciones[NUM_ESTUDIANTES][NUM_ASIGNATURAS] = {{85, 90, 88, 92},
+                                                              {78, 85, 80, 87},
+                                                              {90, 92, 94, 88}};
+
+    calcularPromedio(calificaciones);
+    ordenarCalificaciones(calificaciones);
+
+    std::cout << "Calificaciones ordenadas de mayor a menor:" << std::endl;
+    for (int i = 0; i < NUM_ESTUDIANTES; ++i) {
+        std::cout << "Estudiante " << i+1 << ": ";
+        for (int j = 0; j < NUM_ASIGNATURAS; ++j) {
+            std::cout << calificaciones[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    int asignatura;
+    std::cout << "Ingrese el número de la asignatura para encontrar la calificación más alta: ";
+    std::cin >> asignatura;
+    if (asignatura >= 0 && asignatura < NUM_ASIGNATURAS) {
+        float maxCalificacion = buscarCalificacionMasAlta(calificaciones, asignatura);
+        std::cout << "La calificación más alta en la asignatura " << asignatura << " es: " << maxCalificacion << std::endl;
+    } else {
+        std::cout << "Número de asignatura inválido." << std::endl;
+    }
+
+    return 0;
+}
+2.-
+#include <iostream>
+#include <algorithm>
+#include <string>
+
+const int MAX_PRODUCTOS = 100;
+const int NUM_COLUMNAS = 3;
+
+// Estructura para representar un producto
+struct Producto {
+    int codigo;
+    std::string nombre;
+    int cantidad;
+};
+
+// Función para agregar un nuevo producto al inventario
+void agregarProducto(Producto inventario[], int& numProductos) {
+    if (numProductos < MAX_PRODUCTOS) {
+        std::cout << "Ingrese el código del producto: ";
+        std::cin >> inventario[numProductos].codigo;
+        std::cin.ignore(); // Limpiar el buffer del teclado
+        std::cout << "Ingrese el nombre del producto: ";
+        std::getline(std::cin, inventario[numProductos].nombre);
+        std::cout << "Ingrese la cantidad en stock: ";
+        std::cin >> inventario[numProductos].cantidad;
+        numProductos++;
+        std::cout << "Producto agregado al inventario." << std::endl;
+    } else {
+        std::cout << "El inventario está lleno, no se puede agregar más productos." << std::endl;
+    }
+}
+
+// Función de comparación para ordenar el inventario por el nombre del producto
+bool compararPorNombre(const Producto& a, const Producto& b) {
+    return a.nombre < b.nombre;
+}
+
+// Función para ordenar el inventario por el nombre del producto en orden alfabético
+void ordenarPorNombre(Producto inventario[], int numProductos) {
+    std::sort(inventario, inventario + numProductos, compararPorNombre);
+}
+
+// Función para encontrar un producto por su código
+int buscarPorCodigo(const Producto inventario[], int numProductos, int codigo) {
+    for (int i = 0; i < numProductos; ++i) {
+        if (inventario[i].codigo == codigo) {
+            return i;
+        }
+    }
+    return -1; // Si no se encuentra el producto
+}
+
+// Proceso para reducir la cantidad en stock de un producto cuando se realiza una venta
+void venderProducto(Producto inventario[], int numProductos) {
+    int codigo;
+    std::cout << "Ingrese el código del producto que se va a vender: ";
+    std::cin >> codigo;
+    int indice = buscarPorCodigo(inventario, numProductos, codigo);
+    if (indice != -1) {
+        int cantidadVenta;
+        std::cout << "Ingrese la cantidad que se va a vender: ";
+        std::cin >> cantidadVenta;
+        if (cantidadVenta > 0 && cantidadVenta <= inventario[indice].cantidad) {
+            inventario[indice].cantidad -= cantidadVenta;
+            std::cout << "Venta realizada. Stock actualizado." << std::endl;
+        } else {
+            std::cout << "La cantidad ingresada es inválida o excede el stock disponible." << std::endl;
+        }
+    } else {
+        std::cout << "El producto con el código ingresado no se encuentra en el inventario." << std::endl;
+    }
+}
+
+// Proceso para aumentar la cantidad en stock de un producto cuando se recibe nuevo stock
+void recibirNuevoStock(Producto inventario[], int numProductos) {
+    int codigo;
+    std::cout << "Ingrese el código del producto al que se le va a agregar stock: ";
+    std::cin >> codigo;
+    int indice = buscarPorCodigo(inventario, numProductos, codigo);
+    if (indice != -1) {
+        int cantidadAgregar;
+        std::cout << "Ingrese la cantidad que se va a agregar al stock: ";
+        std::cin >> cantidadAgregar;
+        if (cantidadAgregar > 0) {
+            inventario[indice].cantidad += cantidadAgregar;
+            std::cout << "Nuevo stock agregado. Stock actualizado." << std::endl;
+        } else {
+            std::cout << "La cantidad ingresada es inválida." << std::endl;
+        }
+    } else {
+        std::cout << "El producto con el código ingresado no se encuentra en el inventario." << std::endl;
+    }
+}
+
+int main() {
+    Producto inventario[MAX_PRODUCTOS];
+    int numProductos = 0;
+
+    // Menú de opciones
+    int opcion;
+    do {
+        std::cout << "\nMENU:" << std::endl;
+        std::cout << "1. Agregar nuevo producto al inventario" << std::endl;
+        std::cout << "2. Ordenar inventario por nombre del producto" << std::endl;
+        std::cout << "3. Buscar producto por código" << std::endl;
+        std::cout << "4. Vender producto" << std::endl;
+        std::cout << "5. Recibir nuevo stock" << std::endl;
+        std::cout << "6. Salir" << std::endl;
+        std::cout << "Ingrese su opción: ";
+        std::cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                agregarProducto(inventario, numProductos);
+                break;
+            case 2:
+                ordenarPorNombre(inventario, numProductos);
+                std::cout << "Inventario ordenado por nombre del producto." << std::endl;
+                break;
+            case 3:
+                int codigo;
+                std::cout << "Ingrese el código del producto a buscar: ";
+                std::cin >> codigo;
+                int indice = buscarPorCodigo(inventario, numProductos, codigo);
+                if (indice != -1) {
+                    std::cout << "Producto encontrado:" << std::endl;
+                    std::cout << "Código: " << inventario[indice].codigo << std::endl;
+                    std::cout << "Nombre: " << inventario[indice].nombre << std::endl;
+                    std::cout << "Cantidad en stock: " << inventario[indice].cantidad << std::endl;
+                } else {
+                    std::cout << "Producto no encontrado en el inventario." << std::endl;
+                }
+                break;
+            case 4:
+                venderProducto(inventario, numProductos);
+                break;
+            case 5:
+                recibirNuevoStock(inventario, numProductos);
+                break;
+            case 6:
+                std::cout << "Saliendo del programa." << std::endl;
+                break;
+            default:
+                std::cout << "Opción inválida. Por favor, ingrese una opción válida." << std::endl;
+                break;
+        }
+    } while (opcion != 6);
+
+    return 0;
+}
+3.-
+#include <iostream>
+
+const int FILAS = 10;
+const int COLUMNAS = 10;
+
+// Función para inicializar el tablero con ceros
+void inicializarTablero(int tablero[][COLUMNAS]) {
+    for (int i = 0; i < FILAS; ++i) {
+        for (int j = 0; j < COLUMNAS; ++j) {
+            tablero[i][j] = 0;
+        }
+    }
+}
+
+// Función para colocar fichas en el tablero
+void colocarFicha(int tablero[][COLUMNAS], int fila, int columna, int tipoFicha) {
+    if (fila >= 0 && fila < FILAS && columna >= 0 && columna < COLUMNAS) {
+        tablero[fila][columna] = tipoFicha;
+    } else {
+        std::cout << "Posición fuera de los límites del tablero." << std::endl;
+    }
+}
+
+// Método de búsqueda para verificar si hay una línea de 4 fichas del mismo tipo
+bool hayLineaDeCuatro(int tablero[][COLUMNAS], int tipoFicha) {
+    // Verificar líneas horizontales
+    for (int i = 0; i < FILAS; ++i) {
+        for (int j = 0; j <= COLUMNAS - 4; ++j) {
+            bool lineaEncontrada = true;
+            for (int k = 0; k < 4; ++k) {
+                if (tablero[i][j + k] != tipoFicha) {
+                    lineaEncontrada = false;
+                    break;
+                }
+            }
+            if (lineaEncontrada) return true;
+        }
+    }
+
+    // Verificar líneas verticales
+    for (int i = 0; i <= FILAS - 4; ++i) {
+        for (int j = 0; j < COLUMNAS; ++j) {
+            bool lineaEncontrada = true;
+            for (int k = 0; k < 4; ++k) {
+                if (tablero[i + k][j] != tipoFicha) {
+                    lineaEncontrada = false;
+                    break;
+                }
+            }
+            if (lineaEncontrada) return true;
+        }
+    }
+
+    // Verificar diagonales ascendentes
+    for (int i = 3; i < FILAS; ++i) {
+        for (int j = 0; j <= COLUMNAS - 4; ++j) {
+            bool lineaEncontrada = true;
+            for (int k = 0; k < 4; ++k) {
+                if (tablero[i - k][j + k] != tipoFicha) {
+                    lineaEncontrada = false;
+                    break;
+                }
+            }
+            if (lineaEncontrada) return true;
+        }
+    }
+
+    // Verificar diagonales descendentes
+    for (int i = 0; i <= FILAS - 4; ++i) {
+        for (int j = 0; j <= COLUMNAS - 4; ++j) {
+            bool lineaEncontrada = true;
+            for (int k = 0; k < 4; ++k) {
+                if (tablero[i + k][j + k] != tipoFicha) {
+                    lineaEncontrada = false;
+                    break;
+                }
+            }
+            if (lineaEncontrada) return true;
+        }
+    }
+
+    return false;
+}
+
+// Proceso para imprimir el estado actual del tablero en consola
+void imprimirTablero(int tablero[][COLUMNAS]) {
+    for (int i = 0; i < FILAS; ++i) {
+        for (int j = 0; j < COLUMNAS; ++j) {
+            std::cout << tablero[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+int main() {
+    int tablero[FILAS][COLUMNAS];
+
+    // Inicializar el tablero con ceros
+    inicializarTablero(tablero);
+
+    // Colocar algunas fichas de ejemplo
+    colocarFicha(tablero, 3, 3, 1);
+    colocarFicha(tablero, 4, 4, 1);
+    colocarFicha(tablero, 5, 5, 1);
+    colocarFicha(tablero, 6, 6, 1);
+
+    // Imprimir el estado actual del tablero
+    std::cout << "Tablero actual:" << std::endl;
+    imprimirTablero(tablero);
+
+    // Verificar si hay una línea de 4 fichas del mismo tipo
+    if (hayLineaDeCuatro(tablero, 1)) {
+        std::cout << "¡Hay una línea de 4 fichas del tipo 1 en el tablero!" << std::endl;
+    } else {
+        std::cout << "No hay una línea de 4 fichas del tipo 1 en el tablero." << std::endl;
+    }
+
+    return 0;
+}
+4.-
+#include <iostream>
+#include <algorithm>
+
+const int NUM_DIAS = 30;
+const int NUM_HORAS = 4;
+
+// Función para calcular la temperatura promedio diaria
+void calcularPromedioDiario(float temperaturas[][NUM_HORAS]) {
+    for (int i = 0; i < NUM_DIAS; ++i) {
+        float sum = 0;
+        for (int j = 0; j < NUM_HORAS; ++j) {
+            sum += temperaturas[i][j];
+        }
+        float promedio = sum / NUM_HORAS;
+        std::cout << "El promedio de temperatura del día " << i+1 << " es: " << promedio << std::endl;
+    }
+}
+
+// Función para ordenar las temperaturas de cada día de menor a mayor
+void ordenarTemperaturas(float temperaturas[][NUM_HORAS]) {
+    for (int i = 0; i < NUM_DIAS; ++i) {
+        std::sort(temperaturas[i], temperaturas[i] + NUM_HORAS);
+    }
+}
+
+// Método de búsqueda para encontrar el día con la temperatura más alta y la más baja
+void encontrarExtremos(float temperaturas[][NUM_HORAS], int& diaTemperaturaAlta, int& diaTemperaturaBaja) {
+    float maxTemperatura = temperaturas[0][0];
+    float minTemperatura = temperaturas[0][0];
+    diaTemperaturaAlta = 1;
+    diaTemperaturaBaja = 1;
+
+    for (int i = 0; i < NUM_DIAS; ++i) {
+        for (int j = 0; j < NUM_HORAS; ++j) {
+            if (temperaturas[i][j] > maxTemperatura) {
+                maxTemperatura = temperaturas[i][j];
+                diaTemperaturaAlta = i + 1;
+            }
+            if (temperaturas[i][j] < minTemperatura) {
+                minTemperatura = temperaturas[i][j];
+                diaTemperaturaBaja = i + 1;
+            }
+        }
+    }
+}
+
+int main() {
+    float temperaturas[NUM_DIAS][NUM_HORAS] = {
+        {20.5, 22.3, 21.8, 19.7},
+        {21.2, 23.1, 22.7, 20.3},
+        // Resto de las temperaturas...
+    };
+
+    calcularPromedioDiario(temperaturas);
+    ordenarTemperaturas(temperaturas);
+
+    int diaTemperaturaAlta, diaTemperaturaBaja;
+    encontrarExtremos(temperaturas, diaTemperaturaAlta, diaTemperaturaBaja);
+
+    std::cout << "El día con la temperatura más alta es el día " << diaTemperaturaAlta << std::endl;
+    std::cout << "El día con la temperatura más baja es el día " << diaTemperaturaBaja << std::endl;
+
+    return 0;
+}
+5.-
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+const int NUM_CIUDADES = 5;
+
+// Función para ingresar las distancias en la matriz
+void ingresarDistancias(int distancias[][NUM_CIUDADES]) {
+    std::cout << "Ingrese las distancias entre las ciudades:" << std::endl;
+    for (int i = 0; i < NUM_CIUDADES; ++i) {
+        for (int j = 0; j < NUM_CIUDADES; ++j) {
+            std::cout << "Distancia de la ciudad " << i+1 << " a la ciudad " << j+1 << ": ";
+            std::cin >> distancias[i][j];
+        }
+    }
+}
+
+// Función para calcular la distancia total de una ciudad a todas las demás
+int calcularDistanciaTotal(int distancias[], int numCiudades) {
+    int distanciaTotal = 0;
+    for (int i = 0; i < numCiudades; ++i) {
+        distanciaTotal += distancias[i];
+    }
+    return distanciaTotal;
+}
+
+// Función de comparación para ordenar las ciudades por su distancia total
+bool compararPorDistanciaTotal(const std::pair<int, int>& a, const std::pair<int, int>& b) {
+    return a.second < b.second;
+}
+
+// Función para ordenar las ciudades por su distancia total a todas las demás
+void ordenarCiudadesPorDistanciaTotal(int distancias[][NUM_CIUDADES], std::vector<std::pair<int, int>>& ciudades) {
+    for (int i = 0; i < NUM_CIUDADES; ++i) {
+        ciudades.push_back(std::make_pair(i, calcularDistanciaTotal(distancias[i], NUM_CIUDADES)));
+    }
+    std::sort(ciudades.begin(), ciudades.end(), compararPorDistanciaTotal);
+}
+
+// Método de búsqueda para encontrar la distancia mínima entre dos ciudades específicas
+int buscarDistanciaMinima(int distancias[][NUM_CIUDADES], int ciudad1, int ciudad2) {
+    return distancias[ciudad1][ciudad2];
+}
+
+// Proceso para imprimir la matriz de distancias y las ciudades ordenadas por su distancia total
+void imprimirMatrizDistancias(int distancias[][NUM_CIUDADES], std::vector<std::pair<int, int>>& ciudades) {
+    std::cout << "Matriz de distancias entre ciudades:" << std::endl;
+    for (int i = 0; i < NUM_CIUDADES; ++i) {
+        for (int j = 0; j < NUM_CIUDADES; ++j) {
+            std::cout << distancias[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << "\nCiudades ordenadas por distancia total:" << std::endl;
+    for (auto& ciudad : ciudades) {
+        std::cout << "Ciudad " << ciudad.first+1 << ": " << ciudad.second << std::endl;
+    }
+}
+
+int main() {
+    int distancias[NUM_CIUDADES][NUM_CIUDADES];
+    std::vector<std::pair<int, int>> ciudades;
+
+    ingresarDistancias(distancias);
+    ordenarCiudadesPorDistanciaTotal(distancias, ciudades);
+
+    imprimirMatrizDistancias(distancias, ciudades);
+
+    // Ejemplo de búsqueda de distancia mínima entre dos ciudades específicas (ciudad 1 y ciudad 3)
+    int ciudad1 = 0; // Ciudad 1
+    int ciudad2 = 2; // Ciudad 3
+    int distanciaMinima = buscarDistanciaMinima(distancias, ciudad1, ciudad2);
+    std::cout << "\nLa distancia mínima entre la ciudad " << ciudad1+1 << " y la ciudad " << ciudad2+1 << " es: " << distanciaMinima << std::endl;
+
+    return 0;
+}
+6.-
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <algorithm>
+
+const int NUM_ESTUDIANTES = 5;
+const int NUM_MATERIAS = 3;
+
+// Función para inicializar el array bidimensional con notas aleatorias
+void inicializarNotas(int notas[][NUM_MATERIAS]) {
+    srand(time(nullptr));
+    for (int i = 0; i < NUM_ESTUDIANTES; ++i) {
+        for (int j = 0; j < NUM_MATERIAS; ++j) {
+            notas[i][j] = rand() % 101; // Genera un número aleatorio entre 0 y 100
+        }
+    }
+}
+
+// Función para calcular el promedio de notas para cada estudiante
+void calcularPromedioNotas(int notas[][NUM_MATERIAS], float promedios[]) {
+    for (int i = 0; i < NUM_ESTUDIANTES; ++i) {
+        float sum = 0;
+        for (int j = 0; j < NUM_MATERIAS; ++j) {
+            sum += notas[i][j];
+        }
+        promedios[i] = sum / NUM_MATERIAS;
+    }
+}
+
+// Función para ordenar las notas de cada estudiante de mayor a menor utilizando Bubble Sort
+void ordenarNotasEstudiante(int notas[]) {
+    for (int i = 0; i < NUM_MATERIAS - 1; ++i) {
+        for (int j = 0; j < NUM_MATERIAS - i - 1; ++j) {
+            if (notas[j] < notas[j + 1]) {
+                std::swap(notas[j], notas[j + 1]);
+            }
+        }
+    }
+}
+
+// Método de búsqueda para encontrar la nota más alta y más baja en una materia específica
+void encontrarExtremosMateria(int notas[][NUM_MATERIAS], int materia, int& notaMasAlta, int& notaMasBaja) {
+    notaMasAlta = notas[0][materia];
+    notaMasBaja = notas[0][materia];
+    for (int i = 1; i < NUM_ESTUDIANTES; ++i) {
+        if (notas[i][materia] > notaMasAlta) {
+            notaMasAlta = notas[i][materia];
+        }
+        if (notas[i][materia] < notaMasBaja) {
+            notaMasBaja = notas[i][materia];
+        }
+    }
+}
+
+// Proceso para imprimir las notas de todos los estudiantes, los promedios y las notas más altas y más bajas de una materia específica
+void imprimirNotas(int notas[][NUM_MATERIAS], float promedios[]) {
+    std::cout << "Notas de los estudiantes:\n";
+    for (int i = 0; i < NUM_ESTUDIANTES; ++i) {
+        std::cout << "Estudiante " << i + 1 << ": ";
+        for (int j = 0; j < NUM_MATERIAS; ++j) {
+            std::cout << notas[i][j] << " ";
+        }
+        std::cout << "- Promedio: " << promedios[i] << std::endl;
+    }
+
+    std::cout << "\nNotas más altas y más bajas por materia:\n";
+    for (int i = 0; i < NUM_MATERIAS; ++i) {
+        int notaMasAlta, notaMasBaja;
+        encontrarExtremosMateria(notas, i, notaMasAlta, notaMasBaja);
+        std::cout << "Materia " << i + 1 << ": Nota más alta: " << notaMasAlta << ", Nota más baja: " << notaMasBaja << std::endl;
+    }
+}
+
+int main() {
+    int notas[NUM_ESTUDIANTES][NUM_MATERIAS];
+    float promedios[NUM_ESTUDIANTES];
+
+    inicializarNotas(notas);
+    calcularPromedioNotas(notas, promedios);
+
+    for (int i = 0; i < NUM_ESTUDIANTES; ++i) {
+        ordenarNotasEstudiante(notas[i]);
+    }
+
+    imprimirNotas(notas, promedios);
+
+    return 0;
+}
